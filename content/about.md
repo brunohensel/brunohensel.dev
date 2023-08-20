@@ -1,6 +1,6 @@
 ---
 title: "About"
-draft: true
+draft: false
 ---
 
 Android software engineer with 4+ years of experience. Based currently in Berlin, but I'm originally from Brazil.
