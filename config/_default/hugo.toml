@@ -4,6 +4,11 @@ title = 'Bruno Hensel'
 theme = 'hello-friend-ng'
 paginate = 10
 
+[markup]
+    [markup.highlight]
+        noClasses = true
+        style = 'base16-snazzy'
+
 [params]
     dateform = "Jan 2, 2006"
     dateformShort = "Jan 2"

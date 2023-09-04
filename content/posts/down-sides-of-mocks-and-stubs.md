@@ -52,7 +52,7 @@ class MyClassTest {
     private val sut: MyClass = MyClass(calc)
 
     @Test
-    fun test_add() {
+    fun testAdd() {
         whenever(calc.sum(1, -3)).doReturn(2) // Stubbing the sum function
 
         assertEquals(sut.getNewValue(1, -3), 2)
