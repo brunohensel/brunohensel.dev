@@ -1,4 +1,4 @@
-baseURL = 'http://brunohensel.dev'
+baseURL = 'https://www.brunohensel.dev'
 languageCode = 'en-us'
 title = 'Bruno Hensel'
 theme = 'hugo-coder' #'hello-friend-ng'
