@@ -9,7 +9,7 @@ draft: true
 The way I see it, this is a function in which the final result is computed at different time:
 
 ```kotlin
-  // example from the Functional Programming with Kotlin
+  // example from the Functional Programming with Kotlin book
   fun <A, B, C> partial1(a: A, f: (A, B) -> C): (B) -> C = { b -> f(a, b) }
 ```
 In this case, we call a function passing in as arguments a `a:A` value and a function from (A, B) to C, producing another function from B to C.
