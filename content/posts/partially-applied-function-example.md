@@ -1,5 +1,5 @@
 ---
-title: "Partially-applied function an `practical` example"
+title: "Partially-applied function. An `practical` example"
 date: 2023-12-23T14:41:00+02:00
 draft: true
 ---
@@ -23,7 +23,8 @@ Example
 
 When you call `partialTenMultipliedBy` passing the number 2, this is the `B` argument of the _partial1_ returning function. This results the block `{ b -> }` being called, which also calls the `f(A, B)` function, finally returning `C`.
 
-Above we will see a practical usage of this technic.
+This is possible due to the fact that Kotlin allows functions to be passed in as arguments or to be returned by other functions. This is known as [Higher-order functions](https://kotlinlang.org/docs/lambdas.html#higher-order-functions). 
+Below we will see a practical usage of this technic.
 
 **Note:** As we will see above, this might incur a run-time overhead due to the creation of additional closures and anonymous functions.
 
@@ -41,21 +42,21 @@ The network DTO would look like this:
 ```kotlin
 data class MovieDTO(
     val id: Int,
-    val backdropPath: String?,
-    val posterPath: String?
+    val backdropPath: String?, // this nullable type comes from the API
+    val posterPath: String?, // this nullable type comes from the API
 )
 ```
 
-Since the information about `backdropPath` and `posterPath` alone is not the useful in the UI layer, they would be left out and the UI model would look like this: 
+Since the information about `backdropPath` and `posterPath` alone is not that useful in the UI layer, they would be left out and the UI model would look like this: 
 
 ```kotlin
 data class Movie(
     val id: Int,
-    override inline val buildImgModel: (type: ImageType) -> MovieImageModel,
+    override inline val buildImgModel: (type: ImageType) -> MovieImageModel?,
 ) : ImageModelBuilder<MovieImageModel> 
 ```
 
-`ImageType` is just an enumeration class for  `Backdrop|Poster`, `ImageModelBuilder` is an interface with a function of an image type to a `T`. `MovieImageModel` is a data class, which holds information about backdrop and poster paths and image type. 
+`ImageType` is just an enumeration class for  `Backdrop|Poster`, `ImageModelBuilder` is an interface with a function of an image type to a `T`. `MovieImageModel` is just a data class, which holds information about path and image type. 
 
 When we do the mapper between the MovieDTO and Movie we have a couple of options to fulfill the signature of the `buildImgModel`.
 * pass a function with the same signature `(ImageType) -> MovieImageModel`
@@ -70,20 +71,27 @@ suspend fun getMovies() : List<Movie> {
     return moviesDTO.map { dto ->
         Movie(
             id = dto.id,
-            buildImgModel = partiallyCompute(dto.backdropPath, dto.posterPath)
+            buildImgModel = buildPartialMovieImageModel(dto.backdropPath, dto.posterPath)
         )
     }
 }
+
 //Note: This is a closure, both backdropPath and posterPath are available within the body of the inner function.
-private fun partiallyCompute(
+private fun buildPartialMovieImageModel(
     backdropPath: String?,
-    posterPath: String?
-) : (ImageType) -> MovieImageModel = { type ->
-    MovieImageModel(backdropPath,posterPath, type)
+    posterPath: String?,
+) : (ImageType) -> MovieImageModel? = { type ->
+    val path = when (type) {
+        ImageType.Backdrop -> backdropPath
+        ImageType.Poster -> posterPath
+    }
+    
+    if (path.isNullOrEmpty()) null // for the brevity we're returning null, you could return a fallback ImageModel that displays local asset instead
+    else MovieImageModel(path, type)
 }
 ```
 
-We partially compute the function, hold the paths' information _in memory_ and wait for the `type` information, when it's available, we finish the computation and return the fully constructed `MovieImageModel`.
+We partially apply the function, holding the paths' information _in memory_ and wait for the `type` information to be provided in order to create a fully formed `MovieImageModel` instance.
 This is what we need, since the type is decided by the UI layer, this is the only information this layer is responsible to provide.
 
 With the help of [coil](https://coil-kt.github.io/coil/getting_started/), we can pass `Any` model to be loaded, so depending on the component, we can create a _backdrop_ or a _poster_ model:
@@ -111,4 +119,10 @@ On a high level, this could be similar to this one:
     }
 ```
 
-That's it :)
+That's it :) 
+
+With this, we create an `ImageModel` lazily by composing functions, which partially apply their arguments at different level of abstractions.
+
+**Note:** If you already have a local persistent logic implemented, you won't need this, at the intercept level, you could for example query your local store to retrieve a path related to a movie id.
+
+Thanks to [Marcello Galhardo](https://twitter.com/marcellogalhard) for reviewing the first draft. 
