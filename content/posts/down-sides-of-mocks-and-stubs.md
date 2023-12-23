@@ -1,7 +1,7 @@
 ---
 title: "The Downsides of Excessive Mocks and Stubs in Unit Testing"
 date: 2023-08-19T08:09:57+02:00
-draft: true
+draft: false
 ---
 
 ## The Downsides of Excessive Mocks and Stubs in Unit Testing
@@ -14,7 +14,7 @@ Before delving into the drawbacks, let's clarify the terms "mock" and "stub." A 
 
 ## The Fragility of Excessive Mocks and Stubs:
 
-At many workplaces (Vinted is definitely not an exception), mocking libraries are used in virtually every unit test, leading to repetitive setup code. This can hinder scalability and create maintenance overhead as developers keep repeating the same configurations.
+At many workplaces, mocking libraries are used in virtually every unit test, leading to repetitive setup code. This can hinder scalability and create maintenance overhead as developers keep repeating the same configurations.
 
 Moreover, the ease of constructing the SUT using mocking libraries might tempt developers to overlook the importance of a good design. For instance violating the Interface Segregation Principle makes very painfull to create a Fake (another type of test doubles, I will cover it in next posts) of it, on the other hand, it's a breeze to do that with a mocking library.
 
@@ -75,3 +75,4 @@ Excessive use of mocks and stubs in unit testing can introduce fragility, hinder
 - Software Engineering at Google ([currently available to read online](https://abseil.io/resources/swe-book))
 - Efective Software Testing
 - Unit Testing (Principles, Practices, and Patterns)
+- This post was posted originally in [Vinted Engineering Blog](https://vinted.engineering/2023/10/02/mocking-framework-downside/)
