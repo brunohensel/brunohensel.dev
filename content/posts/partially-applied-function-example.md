@@ -71,7 +71,7 @@ suspend fun getMovies() : List<Movie> {
     return moviesDTO.map { dto ->
         Movie(
             id = dto.id,
-            buildImgModel = buildPartialMovieImageModel(dto.backdropPath, dto.posterPath)
+            buildImgModel = buildPartialMovieImageModel(dto.backdropPath, dto.posterPath),
         )
     }
 }
@@ -125,6 +125,10 @@ That's it :)
 
 With this, we create an `ImageModel` lazily by composing functions that partially apply their arguments at different levels of abstraction.
 
-**Note:** If you already have a local persistent logic implemented, you won't need this; at the intercept level, you could, for example, query your local store to retrieve a path related to a movie ID.
+**Note:** If you already have a local persistent logic implemented, you won't need this; at the intercept level, you could, for example, query your local store to retrieve a path related to a movie ID. 
 
 Thanks to [Marcello Galhardo](https://twitter.com/marcellogalhard) for reviewing the first draft. 
+
+Resources
+* [Tivi](https://github.com/chrisbanes/tivi) project consumed the same API and had to solve a similar issue to download images.
+* [Functional Programming in Kotlin](https://www.goodreads.com/book/show/49199400-functional-programming-in-kotlin) p. 27
