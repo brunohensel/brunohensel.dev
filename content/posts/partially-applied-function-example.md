@@ -9,7 +9,7 @@ draft: true
 The way I see it, this is a function in which the final result is computed at different time:
 
 ```kotlin
-  // example from the Functional Programming with Kotlin book
+  // Example from the Functional Programming with Kotlin book
   fun <A, B, C> partial1(a: A, f: (A, B) -> C): (B) -> C = { b -> f(a, b) }
 ```
 In this case, we call a function passing in as arguments a `a:A` value and a function from (A, B) to C, producing another function from B to C.
@@ -26,16 +26,16 @@ When you call `partialTenMultipliedBy` passing the number 2, this is the `B` arg
 Having partially applied functions is possible because Kotlin allows functions to be passed in as arguments or returned by other functions. Such a way of doing it is known as [Higher-order functions](https://kotlinlang.org/docs/lambdas.html#higher-order-functions).
 Below, we will see a practical usage of this technique.
 
-**Note:** As we will see above, this might incur a run-time overhead due to the creation of additional closures and anonymous functions.
+**Note:** As we will see below, this might incur a run-time overhead due to the creation of additional closures and anonymous functions.
 
 ## Use case
 I was working on one of my never-finished side projects to try out new technologies and one of the tasks I had to implement was to display images.
 The Android App consumes [TMDB](https://developer.themoviedb.org/) API. According to the documentation, you'll need three pieces of data to generate a fully working image URL: `base_url`, a `file_size` and a `file_path` (backdrop, logo, or poster).
 
-The first two we can retrieve from the `/configuration` endpoint. However, we need to decide which size is more suitable for our component based on its size.
-At the end, we need to have a URL that looks like this one: _image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.svg_. [source](https://developer.themoviedb.org/docs/image-basics)
+The first two we can retrieve from the `/configuration` endpoint. However, we need to decide which _file_size_ is more suitable for our component based on its size.
+At the end, we need to have a URL that looks like this one: _image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.svg_. [Source](https://developer.themoviedb.org/docs/image-basics)
 
-Currently, I have yet to implement any persistent solution (SQL, Room, or SharedPreferences), and left the URL construction to be made on the UI layer is error-prone, and we would be leaking information about how to build an image URL.
+Currently, I have yet to implement any persistent solution (SQL, Room, or SharedPreferences), and left the URL construction to be made on the UI layer is error-prone, and we would be leaking information about what is needed to build a working image URL.
 
 The network DTO would look like this:
 
@@ -117,6 +117,8 @@ On a high level, this could be similar to this one:
 
         return chain.proceed(rq)
     }
+
+    private fun buildFinalUrl(model: MovieImageModel, width: Int) : String { ... }
 ```
 
 That's it :) 
