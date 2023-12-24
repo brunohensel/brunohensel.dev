@@ -99,7 +99,7 @@ With the help of [coil](https://coil-kt.github.io/coil/getting_started/), we can
 AsyncImage(model = state.movie.buildImgModel(ImageType.Backdrop))
 ```
 
-We also need to [intercept](https://coil-kt.github.io/coil/image_pipeline/#interceptors) the request to use the information about the size of the component requesting the image and decide which size we will pass in the URL, and then proceed with the request with a full built URL.
+We also need to [intercept](https://coil-kt.github.io/coil/image_pipeline/#interceptors) the request to use the information about the size of the component displaying the image and decide which size we will pass in the URL, and then proceed with the request with a full built URL.
 
 On a high level, this could be similar to this one:
 
