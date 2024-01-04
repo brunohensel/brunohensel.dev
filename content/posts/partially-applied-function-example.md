@@ -1,7 +1,7 @@
 ---
 title: "Partially-applied function. An `practical` example"
 date: 2023-12-23T14:41:00+02:00
-draft: true
+draft: false
 ---
 ## Partial application
 >In computer science, partial application (or partial function application) refers to the process of fixing a number of arguments of a function, producing another function of smaller arity. [Source](https://en.wikipedia.org/wiki/Partial_application)
