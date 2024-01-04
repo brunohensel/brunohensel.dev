@@ -30,10 +30,10 @@ Below, we will see a practical usage of this technique.
 
 ## Use case
 I was working on one of my never-finished side projects to try out new technologies and one of the tasks I had to implement was to display images.
-The Android App consumes [TMDB](https://developer.themoviedb.org/) API. According to the documentation, you'll need three pieces of data to generate a fully working image URL: `base_url`, a `file_size` and a `file_path` (backdrop, logo, or poster).
+The Android App consumes the [TMDB](https://developer.themoviedb.org/) API. According to the documentation, you'll need three pieces of data to generate a fully working image URL: `base_url`, a `file_size` and a `file_path` (backdrop, logo, or poster).
 
 We can retrieve the first two from the `/configuration` endpoint. However, we need to decide which _file_size_ is more suitable for our component based on its size.
-At the end, we need to have a URL that looks like this one: _image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.svg_. [Source](https://developer.themoviedb.org/docs/image-basics)
+At the end, we need to have a URL that looks like this one: _image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.svg_. _/original/_ being the _file_size_. [Source](https://developer.themoviedb.org/docs/image-basics)
 
 Currently, I have yet to implement any persistent solution (SQL, Room, or SharedPreferences), and left the URL construction to be made on the UI layer is error-prone, and we would be leaking information about what is needed to build a working image URL.
 
@@ -92,43 +92,16 @@ private fun buildPartialMovieImageModel(
 ```
 
 We partially apply the function, holding the paths' information _in memory_  waiting for the `type` information to be provided to create a fully formed `MovieImageModel` instance.
-This is what we need; since the UI layer decides the type, this is the only information this layer is responsible for providing.
+This is what we need; since the UI layer decides the type, this is the only information this layer is responsible for providing. So depending on the component the image will be rendered on, we can call `state.movie.buildImgModel(ImageType.Backdrop  or ImageType.Poster)`
 
-With the help of [coil](https://coil-kt.github.io/coil/getting_started/), we can pass `Any` model to be loaded, so depending on the component, we can create a _backdrop_ or a _poster_ model:
-```
-AsyncImage(model = state.movie.buildImgModel(ImageType.Backdrop))
-```
-
-We also need to [intercept](https://coil-kt.github.io/coil/image_pipeline/#interceptors) the request to use the information about the size of the component displaying the image and decide which size we will pass in the URL, and then proceed with the request with a full built URL.
-
-On a high level, this could be similar to this one:
-
-```kotlin
-    override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
-        val rq = when (val model = chain.request.data) {
-            is MovieImageModel -> {
-                chain.request.newBuilder()
-                    .data(buildFinalUrl(model, chain.size.width))
-                    .build()
-            }
-
-            else -> chain.request
-        }
-
-        return chain.proceed(rq)
-    }
-
-    private fun buildFinalUrl(model: MovieImageModel, width: Int) : String { ... }
-```
+The _file_size_ most likely will depend on the size of the View component, it could either be passed together with the image type or the request could be intercepted and there we resolve the _file_size_.
 
 That's it :) 
 
 With this, we create an `ImageModel` lazily by composing functions that partially apply their arguments at different levels of abstraction.
-
-**Note:** If you already have a local persistent logic implemented, you won't need this; at the intercept level, you could, for example, query your local store to retrieve a path related to a movie ID. 
+This technique not only can streamlines code but also empowers developers to construct dynamic and lazy compositions, as showcased in our image URL use case.
 
 Resources
-* [Tivi](https://github.com/chrisbanes/tivi) project consumed the same API and had to solve a similar issue to download images.
 * [Functional Programming in Kotlin](https://www.goodreads.com/book/show/49199400-functional-programming-in-kotlin) p. 27
 
 Thanks to [Marcello Galhardo](https://twitter.com/marcellogalhard) for reviewing the first draft. 
