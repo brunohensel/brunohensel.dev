@@ -1,5 +1,5 @@
 ---
-title: "Partially-applied function, a `practical` example."
+title: "Partially-applied function. A `practical` example."
 date: 2023-12-23T14:41:00+02:00
 draft: false
 ---
