@@ -54,3 +54,6 @@ paginate = 10
         identifier = "blog"
         name       = "Blog"
         url        = "/posts"
+
+[params.googleTagManager]
+    id = "G-ED4JJJVD8G"
