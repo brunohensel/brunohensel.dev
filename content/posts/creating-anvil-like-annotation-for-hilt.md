@@ -88,6 +88,10 @@ class BindingProcessor(private val codeGenerator: CodeGenerator) : SymbolProcess
 ```
 In the `process` method, we will get all the classes annotated with our annotation, and visit them to get the information about the `Component` where the binding has to be installed in, and the Super type being implemented by the annotated class. With that information we can create a new File and add our generated `@Module` in it.
 
+Since KSP processes happens in multiple rounds, we need to return all symbols our processor wasn't able to process, so other processors in the code can process them.
+Documentation explains that:
+>Returns: A list of deferred symbols that the processor can't process. Only symbols that can't be processed at this round should be returned.
+
 The `ContributeBindingVisitor` class extends `KSVisitorVoid` class, and we use one of its methods to visit the annotated class declaration. Here we can validate the correctness and expectations of the code.
 
 ```kotlin
