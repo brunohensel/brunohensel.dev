@@ -20,6 +20,7 @@ Unfortunately, we can't use it in all places. It's not possible to only rely on 
 
 ```kotlin
 @Module
+@InstallIn(SingletonComponent::class)
 object DatabaseModule {
     
     @Provides
@@ -29,6 +30,7 @@ object DatabaseModule {
 // OR
 
 @Module
+@InstallIn(SingletonComponent::class)
 interface DatabaseModule {
     
     @Binds
@@ -38,15 +40,16 @@ interface DatabaseModule {
 
 You can read more about it in the [official documentation](https://dagger.dev/dev-guide/).
 
-With this short snippet, we can see that we need to create a `@Module` and add provides a way for dagger to create an alias to the type - `Database` in the above example.
+With this short snippet, we can see that we need to create a `@Module` and provides a way for dagger to create an alias to the type - `Database` in the above example.
 
+#### Anvil reduces some wiring boilerplate 
 [Anvil](https://github.com/square/anvil) is a kotlin compiler plugin that makes dependency injection with Dagger easier by generating a lot of boilerplate in our behalf. You can reach to its official documentation to learn more about it. 
 
-We are focusing in a particular type of annotation that Anvil introduced, which makes very easy to bind interfaces with its implementation: `@ContributesBinding`. This annotation replaces the need of creating a `@Module`, contributing the dependency directly to the `Compoent`.
+We are gonna focusing on a particular type of annotation that Anvil introduced, which makes very easy to bind interfaces to its implementation: `@ContributesBinding`. This annotation replaces the need of creating a `@Module` by contributing the dependency directly to the `Compoent`.
 
 ### Generating a module for Hilt
 
-The goal is to annotate the implementation of an interface and have all the module, binding boilerplate be created for us.
+The goal is to annotate the implementation of an interface and have the module and binding boilerplate be created for us.
 
 We need to create our annotation. We can put it inside a dedicated [module](https://github.com/brunohensel/Hilt-Annotation/tree/main/annotation). 
 ```kotlin
@@ -55,14 +58,15 @@ We need to create our annotation. We can put it inside a dedicated [module](http
 @GeneratesRootInput
 annotation class ContributesBinding(val component: KClass<*>, val boundType: KClass<*> = Any::class)
 ```
-[GeneratesRootInput](https://dagger.dev/api/latest/dagger/hilt/GeneratesRootInput.html) lets Hilt knows that it has to wait before creating the components.
+**Note:** [GeneratesRootInput](https://dagger.dev/api/latest/dagger/hilt/GeneratesRootInput.html) lets Hilt knows that it has to wait before creating the components.
 
-Now we move to create our processor. For that, we need to add a dependency on [KSP](https://kotlinlang.org/docs/ksp-overview.html) to generate code for us. In the link you can go to the `Quickstart` to get more familiar with it.
+Now we move onto creating our processor. For that, we need to add a dependency on [KSP](https://kotlinlang.org/docs/ksp-overview.html) that will generate code for us. In the link you can go to the `Quickstart` to get more familiar with it and go through the setup.
 
 To integrate into the Kotlin Symbol Processing - KSP, we need our class to implement the `SymbolProcessor`. 
 
 ```kotlin
 class BindingProcessor(private val codeGenerator: CodeGenerator) : SymbolProcessor {
+    
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getSymbolsWithAnnotation(Utils.CONTRIBUTES_BINDING.canonicalName)
         val invalid = symbols.filter { !it.validate() }.toList()
@@ -79,7 +83,7 @@ class BindingProcessor(private val codeGenerator: CodeGenerator) : SymbolProcess
     }
 } 
 ```
-In the `process` method, we will get all the classes annotated with our annotation, and visit them in order get the information about the `Component` where the binding has to be installed in, and the super type being implemented by the annotated class. With that information we can create a new File and add our @Module in it.
+In the `process` method, we will get all the classes annotated with our annotation, and visit them to get the information about the `Component` where the binding has to be installed in, and the Super type being implemented by the annotated class. With that information we can create a new File and add our generated `@Module` in it.
 
 The `ContributeBindingVisitor` class extends `KSVisitorVoid` class, and we use one of its methods to visit the annotated class declaration. Here we can validate the correctness and expectations of the code.
 
@@ -89,10 +93,15 @@ override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: U
     val component = resolveType(annotation.arguments.component1().value!!)
     val boundType = annotation.arguments.component2()
     val defaultArgument = annotation.defaultArguments.component1()
-    val superTypesCount = classDeclaration.superTypes.count()
-    val firstSuperType = classDeclaration.getAllSuperTypes().first()
+    val superTypes = classDeclaration.superTypes
+    val superTypesCount = superTypes.count()
+    val firstSuperType = superTypes.firstOrNull()?.resolve()
+        ?: throw IllegalStateException(
+            "A class annotated with @ContributesBinding should implement at least one interface"
+        )
 
     if (superTypesCount > 1 && boundType == defaultArgument) {
+        // we could throw an exception here as well
         logger.exception(
             IllegalArgumentException(
                 "There are more than one super type declared without any bounded type declaration "
