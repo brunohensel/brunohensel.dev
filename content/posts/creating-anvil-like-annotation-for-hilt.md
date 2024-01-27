@@ -202,4 +202,4 @@ public interface AnnotationTest_HiltBindingModule {
 }
 ```
 
-This was more a summary of my own experimentation trying to use KSP, the working project can be found in this [repository](https://github.com/brunohensel/Hilt-Annotation). 
+This was more a summary of my own experimentation trying to use KSP. It's not a production code. The working project can be found in this [repository](https://github.com/brunohensel/Hilt-Annotation). 
