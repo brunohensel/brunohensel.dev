@@ -1,5 +1,5 @@
 ---
-title: "Creating Anvil-like annotation for Hilt"
+title: "Creating Anvil-like annotation for Hilt using KSP"
 date: 2024-01-26T17:05:15+02:00
 draft: true
 ---
@@ -60,6 +60,8 @@ annotation class ContributesBinding(val component: KClass<*>, val boundType: KCl
 ```
 **Note:** [GeneratesRootInput](https://dagger.dev/api/latest/dagger/hilt/GeneratesRootInput.html) lets Hilt knows that it has to wait before creating the components.
 
+_Bound type_ is useful in case your class implements more than one interface, and you need to tell which one needs to be provided.
+
 Now we move onto creating our processor. For that, we need to add a dependency on [KSP](https://kotlinlang.org/docs/ksp-overview.html) that will generate code for us. In the link you can go to the `Quickstart` to get more familiar with it and go through the setup.
 
 To integrate into the Kotlin Symbol Processing - KSP, we need our class to implement the `SymbolProcessor`. 
@@ -69,9 +71,10 @@ class BindingProcessor(private val codeGenerator: CodeGenerator) : SymbolProcess
     
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getSymbolsWithAnnotation(Utils.CONTRIBUTES_BINDING.canonicalName)
-        val invalid = symbols.filter { !it.validate() }.toList()
+        // creates a pair of valid and invalid list of symbols
+        val (validSymbols, invalidSymbols) = symbols.partition { it.validate() }
 
-        for (symbol in symbols) {
+        for (symbol in validSymbols) {
             if (symbol is KSClassDeclaration && symbol.validate()) {
                 symbol.accept(
                     visitor = ContributeBindingVisitor(codeGenerator, logger),
@@ -79,7 +82,7 @@ class BindingProcessor(private val codeGenerator: CodeGenerator) : SymbolProcess
                 )
             }
         }
-        return invalid
+        return invalidSymbols // symbols that the processor can't process.
     }
 } 
 ```
@@ -144,6 +147,7 @@ internal fun bindingFileSpec(
         else -> error("Bound type is not a class")
     }
 
+    // This will create the @Module interface with @InstallIn and @OriginatingElement annotations
     val hiltModuleSpec = TypeSpec.interfaceBuilder(moduleName)
         .addAnnotation(Utils.DAGGER_MODULE)
         .addAnnotation(
@@ -156,6 +160,7 @@ internal fun bindingFileSpec(
                 .addMember("topLevelClass = %T::class", subtypeClassName)
                 .build()
         )
+        // this will create the @Binds fun bind(impl: TypeImpl): Type
         .addModifiers(KModifier.PUBLIC)
         .addFunction(
             FunSpec.builder("bind$bindName")
@@ -170,9 +175,9 @@ internal fun bindingFileSpec(
 }
 ```
 
-[OriginatingElement](https://dagger.dev/api/latest/dagger/hilt/codegen/OriginatingElement.html) is needed because we are generating modules.
+[OriginatingElement](https://dagger.dev/api/latest/dagger/hilt/codegen/OriginatingElement.html) is needed because we are generating Hilt modules.
 
-Now, we can use the annotation and let KSP generate the boilerplate for use.
+Now, we can use the annotation and let KSP generate the boilerplate for use. No need to manually creates a `@Module` or have to add a bind function inside of one.
 
 ```kotlin
 interface Test {
