@@ -75,7 +75,7 @@ class BindingProcessor(private val codeGenerator: CodeGenerator) : SymbolProcess
         val (validSymbols, invalidSymbols) = symbols.partition { it.validate() }
 
         for (symbol in validSymbols) {
-            if (symbol is KSClassDeclaration && symbol.validate()) {
+            if (symbol is KSClassDeclaration) {
                 symbol.accept(
                     visitor = ContributeBindingVisitor(codeGenerator, logger),
                     data = Unit
