@@ -171,6 +171,7 @@ internal fun bindingFileSpec(
                 .build()
         )
         .build()
+    
     return FileSpec.builder(moduleName).addType(hiltModuleSpec).build()
 }
 ```
