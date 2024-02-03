@@ -15,8 +15,7 @@ When you are creating classes, usually only annotating them with `@Inject` will 
 ```kotlin
 class LocalDataSource @Iject constructor(db: Database) { ... }
 ```
-
-Unfortunately, we can't use it in all places. It's not possible to only rely on this annotation when we are implementing an interface which itself will be injected in some constructor later on. For this case, we could use either `@Provides` or `@Binds` annotation.
+Unfortunately, its usage is limited. This annotation alone cannot be relied upon when implementing an interface that will subsequently be injected into a constructor.
 
 ```kotlin
 @Module
@@ -42,7 +41,7 @@ You can read more about it in the [official documentation](https://dagger.dev/de
 
 With this short snippet, we can see that we need to create a `@Module` and provides a way for dagger to create an alias to the type - `Database` in the above example.
 
-#### Anvil reduces some wiring boilerplate 
+#### Anvil simplifies the process by reducing wiring boilerplate.
 [Anvil](https://github.com/square/anvil) is a kotlin compiler plugin that makes dependency injection with Dagger easier by generating a lot of boilerplate in our behalf. You can reach to its official documentation to learn more about it. 
 
 We are gonna focusing on a particular type of annotation that Anvil introduced, which makes very easy to bind interfaces to its implementation: `@ContributesBinding`. This annotation replaces the need of creating a `@Module` by contributing the dependency directly to the `Compoent`.
@@ -131,7 +130,7 @@ override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: U
 }
 ```
 
-With the help of [Kotlinpoet](https://github.com/square/kotlinpoet), we can easily create kotlin code. This is done by the function `bindingFileSpec`.
+Leveraging [Kotlinpoet](https://github.com/square/kotlinpoet), we can effortlessly generate Kotlin code. This is done by the function `bindingFileSpec`.
 
 ```kotlin
 internal fun bindingFileSpec(
@@ -207,4 +206,4 @@ public interface AnnotationTest_HiltBindingModule {
 }
 ```
 
-This was more a summary of my own experimentation trying to use KSP. It's not a production code. The working project can be found in this [repository](https://github.com/brunohensel/Hilt-Annotation). 
+This serves as a summary of my personal experimentation with KSP. Please note that it is not production-ready code. The working project can be found in this [repository](https://github.com/brunohensel/Hilt-Annotation). 
