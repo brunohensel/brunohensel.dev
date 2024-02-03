@@ -1,7 +1,7 @@
 ---
 title: "Creating Anvil-like annotation for Hilt using KSP"
-date: 2024-01-26T17:05:15+02:00
-draft: true
+date: 2024-02-03T16:57:15+02:00
+draft: false
 ---
 
 _This post assumes some familiarity with dependency injection using Dagger Hilt on Android._
