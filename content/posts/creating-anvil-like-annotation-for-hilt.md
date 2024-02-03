@@ -44,11 +44,11 @@ With this short snippet, we can see that we need to create a `@Module` and provi
 #### Anvil simplifies the process by reducing wiring boilerplate.
 [Anvil](https://github.com/square/anvil) is a kotlin compiler plugin that makes dependency injection with Dagger easier by generating a lot of boilerplate in our behalf. You can reach to its official documentation to learn more about it. 
 
-We are gonna focusing on a particular type of annotation that Anvil introduced, which makes very easy to bind interfaces to its implementation: `@ContributesBinding`. This annotation replaces the need of creating a `@Module` by contributing the dependency directly to the `Compoent`.
+In this post, our focus will be on a specific annotation introduced by Anvil: `@ContributesBinding`. We'll explore how this annotation simplifies the process of binding interfaces to their implementations. This annotation replaces the need of creating a `@Module` by contributing the dependency directly to the `Compoent`.
 
 ### Generating a module for Hilt
 
-The goal is to annotate the implementation of an interface and have the module and binding boilerplate be created for us.
+The objective is to annotate the implementation of an interface, allowing the automatic generation of module and binding boilerplate. This facilitates the integration of the annotated class within the Dagger Hilt framework.
 
 We need to create our annotation. We can put it inside a dedicated [module](https://github.com/brunohensel/Hilt-Annotation/tree/main/annotation). 
 ```kotlin
@@ -87,7 +87,7 @@ class BindingProcessor(private val codeGenerator: CodeGenerator) : SymbolProcess
 ```
 In the `process` method, we will get all the classes annotated with our annotation, and visit them to get the information about the `Component` where the binding has to be installed in, and the Super type being implemented by the annotated class. With that information we can create a new File and add our generated `@Module` in it.
 
-Since KSP processes happens in multiple rounds, we need to return all symbols our processor wasn't able to process, so other processors in the code can process them.
+As KSP processes occur in multiple rounds, our processor returns symbols it couldn't process. This ensures that other processors in the code can handle them during subsequent rounds of processing.
 The documentation of the _process_ function explains that:
 >Returns: A list of deferred symbols that the processor can't process. Only symbols that can't be processed at this round should be returned.
 
@@ -181,7 +181,7 @@ internal fun bindingFileSpec(
 
 [OriginatingElement](https://dagger.dev/api/latest/dagger/hilt/codegen/OriginatingElement.html) is needed because we are generating Hilt modules.
 
-Now, we can use the annotation and let KSP generate the boilerplate for use. No need to manually creates a `@Module` or have to add a bind function inside of one.
+Now, we can use the annotation and let KSP generate the necessary Dagger Hilt boilerplate code for our specific use case.  No need to manually creates a `@Module` or have to add a bind function inside of one.
 
 ```kotlin
 interface Test {
