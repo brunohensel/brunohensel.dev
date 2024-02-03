@@ -206,4 +206,5 @@ public interface AnnotationTest_HiltBindingModule {
 }
 ```
 
-This serves as a summary of my personal experimentation with KSP. Please note that it is not production-ready code. The working project can be found in this [repository](https://github.com/brunohensel/Hilt-Annotation). 
+In conclusion, it's important to note that this post serves as a summary of my personal exploration with KSP. The code provided is experimental in nature and does not prioritize production-level considerations, such as performance optimization. It was crafted primarily to explore possibilities and demonstrate concepts.
+The working project can be found in this [repository](https://github.com/brunohensel/Hilt-Annotation). 
