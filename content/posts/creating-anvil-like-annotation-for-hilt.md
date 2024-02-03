@@ -1,7 +1,7 @@
 ---
 title: "Creating Anvil-like annotation for Hilt using KSP"
-date: 2024-01-26T17:05:15+02:00
-draft: true
+date: 2024-02-03T16:57:15+02:00
+draft: false
 ---
 
 _This post assumes some familiarity with dependency injection using Dagger Hilt on Android._
@@ -15,8 +15,7 @@ When you are creating classes, usually only annotating them with `@Inject` will 
 ```kotlin
 class LocalDataSource @Iject constructor(db: Database) { ... }
 ```
-
-Unfortunately, we can't use it in all places. It's not possible to only rely on this annotation when we are implementing an interface which itself will be injected in some constructor later on. For this case, we could use either `@Provides` or `@Binds` annotation.
+Unfortunately, its usage is limited. This annotation alone cannot be relied upon when implementing an interface that will subsequently be injected into a constructor.
 
 ```kotlin
 @Module
@@ -42,14 +41,14 @@ You can read more about it in the [official documentation](https://dagger.dev/de
 
 With this short snippet, we can see that we need to create a `@Module` and provides a way for dagger to create an alias to the type - `Database` in the above example.
 
-#### Anvil reduces some wiring boilerplate 
+#### Anvil simplifies the process by reducing wiring boilerplate.
 [Anvil](https://github.com/square/anvil) is a kotlin compiler plugin that makes dependency injection with Dagger easier by generating a lot of boilerplate in our behalf. You can reach to its official documentation to learn more about it. 
 
-We are gonna focusing on a particular type of annotation that Anvil introduced, which makes very easy to bind interfaces to its implementation: `@ContributesBinding`. This annotation replaces the need of creating a `@Module` by contributing the dependency directly to the `Compoent`.
+In this post, our focus will be on a specific annotation introduced by Anvil: `@ContributesBinding`. We'll explore how this annotation simplifies the process of binding interfaces to their implementations. This annotation replaces the need of creating a `@Module` by contributing the dependency directly to the `Compoent`.
 
 ### Generating a module for Hilt
 
-The goal is to annotate the implementation of an interface and have the module and binding boilerplate be created for us.
+The objective is to annotate the implementation of an interface, allowing the automatic generation of module and binding boilerplate. This facilitates the integration of the annotated class within the Dagger Hilt framework.
 
 We need to create our annotation. We can put it inside a dedicated [module](https://github.com/brunohensel/Hilt-Annotation/tree/main/annotation). 
 ```kotlin
@@ -88,7 +87,7 @@ class BindingProcessor(private val codeGenerator: CodeGenerator) : SymbolProcess
 ```
 In the `process` method, we will get all the classes annotated with our annotation, and visit them to get the information about the `Component` where the binding has to be installed in, and the Super type being implemented by the annotated class. With that information we can create a new File and add our generated `@Module` in it.
 
-Since KSP processes happens in multiple rounds, we need to return all symbols our processor wasn't able to process, so other processors in the code can process them.
+As KSP processes occur in multiple rounds, our processor returns symbols it couldn't process. This ensures that other processors in the code can handle them during subsequent rounds of processing.
 The documentation of the _process_ function explains that:
 >Returns: A list of deferred symbols that the processor can't process. Only symbols that can't be processed at this round should be returned.
 
@@ -131,7 +130,7 @@ override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: U
 }
 ```
 
-With the help of [Kotlinpoet](https://github.com/square/kotlinpoet), we can easily create kotlin code. This is done by the function `bindingFileSpec`.
+Leveraging [Kotlinpoet](https://github.com/square/kotlinpoet), we can effortlessly generate Kotlin code. This is done by the function `bindingFileSpec`.
 
 ```kotlin
 internal fun bindingFileSpec(
@@ -182,7 +181,7 @@ internal fun bindingFileSpec(
 
 [OriginatingElement](https://dagger.dev/api/latest/dagger/hilt/codegen/OriginatingElement.html) is needed because we are generating Hilt modules.
 
-Now, we can use the annotation and let KSP generate the boilerplate for use. No need to manually creates a `@Module` or have to add a bind function inside of one.
+Now, we can use the annotation and let KSP generate the necessary Dagger Hilt boilerplate code for our specific use case.  No need to manually creates a `@Module` or have to add a bind function inside of one.
 
 ```kotlin
 interface Test {
@@ -207,4 +206,5 @@ public interface AnnotationTest_HiltBindingModule {
 }
 ```
 
-This was more a summary of my own experimentation trying to use KSP. It's not a production code. The working project can be found in this [repository](https://github.com/brunohensel/Hilt-Annotation). 
+In conclusion, it's important to note that this post serves as a summary of my personal exploration with KSP. The code provided is experimental in nature and does not prioritize production-level considerations, such as performance optimization. It was crafted primarily to explore possibilities and demonstrate concepts.
+The working project can be found in this [repository](https://github.com/brunohensel/Hilt-Annotation). 
