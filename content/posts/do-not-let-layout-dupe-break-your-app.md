@@ -1,7 +1,7 @@
 ---
 title: "Don't let Layout duplication break your App"
 date: 2024-07-13T08:07:15+02:00
-draft: true
+draft: false
 ---
 ###### How View Binding can help
 View binding is a great feature that simplifies interacting with views in your Android app. 
