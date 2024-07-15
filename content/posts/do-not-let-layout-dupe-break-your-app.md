@@ -79,7 +79,7 @@ and use its `bind` method to link it with the inflated view, regardless of the s
 
 ### Catching Layout Inconsistencies
 
-{{< notice note >}} We'll focus on writing a unit test instead of an integration test (AndroidTest) {{< /notice >}}
+{{< notice note >}} We'll focus on writing an integration test without using an emulator or real device. {{< /notice >}}
 
 As mentioned before, having different layout sources to be inflated and only one binding class to be used in a Fragment
 introduces the risk of inconsistencies between the original and copied layouts. These inconsistencies, like mismatched IDs or view types, can lead to runtime exceptions that crash your app.
@@ -99,7 +99,7 @@ test will fail, and we will catch this problem before the users.
 The first approach it came to my mind was to traverse both layout trees and then compare their ids to identify any discrepancies.
 If a difference is found, the test fails, alerting you to the inconsistency.
 
-The second one (simpler), leverages the exception-throwing behavior of view binding itself. We can write a unit test that
+The second one (simpler), leverages the exception-throwing behavior of view binding itself. We can write an integration test that
 creates a Fragment scenario and launch a Fragment with a _view binding_ bound to a layout source passed in as argument to the Fragment.
 ___
 
@@ -242,4 +242,4 @@ However, it's possible to have different view types between different layout con
  ___
 That's it, now we can catch the exception earlier and not be surprised in production with a crash. The first approach (traversing the View tree) has its limitation since we are one step behind trying to catch up with built-in behavior of view binding; the second one (using Fragment scenario) is more reliable since we are using the view binding's machinery in the test.
 
-**Note:** You can also write an AndroidTest that launches a real Fragment on an emulator to get an even more realistic test scenario, but this approach might be slower than a unit test.
+**Note:** You can also write an AndroidTest that launches a real Fragment on an emulator to get an even more realistic test scenario, but this approach might be slower than an integration test without the emulator.
