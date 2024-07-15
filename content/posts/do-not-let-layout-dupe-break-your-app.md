@@ -129,7 +129,7 @@ node and its children nodes.
 This could be an _expensive_ operation, since it iterates through all child views of a ViewGroup,
 regardless of whether they belong to the source layout. This can lead to unnecessary processing, especially for complex layouts with many nested custom views. That's why we need to compare if a `child#sourceLayoutResId` is the same as the root view. 
 
-{{< notice warning >}} For the sake of brevity, the following algorithm is intentionally incomplete. It does not take into account <merge> or <include> tags. It also does not store view type for further equality check between layouts.  {{< /notice >}}
+{{< notice warning >}} For the sake of brevity, the following algorithm is intentionally incomplete. It does not take into account `<merge>` or `<include>` tags. It also does not store view type for further equality check between layouts.  {{< /notice >}}
 
 
 ```kotlin
