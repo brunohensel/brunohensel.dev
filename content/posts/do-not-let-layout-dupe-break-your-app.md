@@ -20,7 +20,7 @@ While duplicating the layout might appear convenient, and your Fragment might no
 
 ### Understanding View Binding generated class
 
-As an example, consider this layout `example_binding`:
+As an example, consider this layout `example_layout`:
 
 ```html
 
@@ -34,7 +34,7 @@ As an example, consider this layout `example_binding`:
 </LinearLayout>
 ```
 
-A binding class will be generated specifically for your layout, named `ExampleBindingBinding` (notice it matches the layout name with "Binding" appended).
+A binding class will be generated specifically for your layout, named `ExampleLayoutBinding` (notice it matches the layout name with "Binding" appended).
 This class provides convenient access to your views through public fields:
 * `rootView: LinearLayout`
 * `myButton: Button`
@@ -52,7 +52,7 @@ Just a sneak peek:
 ```java
 
 @NonNull
-public static ExampleBindingBinding bind(@NonNull View rootView) {
+public static ExampleLayoutBinding bind(@NonNull View rootView) {
   // The body of this method is generated in a way you would not otherwise write.
   // This is done to optimize the compiled bytecode for size and performance.
   int id;
@@ -112,14 +112,14 @@ First, we will create a dummy View, in which both view bindings (original and co
 
 
 ```kotlin
-class TestView @JvmOverloads constructor(
+class DummyView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
-    val binding = ExampleBindingBinding.inflate(LayoutInflater.from(context))
-    val copyBinding = CopyExampleBindingBinding.inflate(LayoutInflater.from(context))
+    val binding = ExampleLayoutBinding.inflate(LayoutInflater.from(context))
+    val copyBinding = CopyExampleLayoutBindingg.inflate(LayoutInflater.from(context))
 }
 ```
 
@@ -177,11 +177,11 @@ Now, we need to write a test that assert the equality of the ids between origina
 
 ```kotlin
 @RunWith(RobolectricTestRunner::class)
-class ExampleUnitTest {
+class ExampleLayoutBindingTest {
 
     @Test
     fun `test id equality between original and copy bindings`() {
-        val v = TestView(InstrumentationRegistry.getInstrumentation().context)
+        val v = DummyView(InstrumentationRegistry.getInstrumentation().context)
         val originalIds = getViewsId(v.binding.root)
         val copyIds = getViewsId(v.copyBinding.root)
 
@@ -193,7 +193,7 @@ class ExampleUnitTest {
 }
 ```
 
-As soon as we delete, let say, `myButton` from the `example_binding`, this test will fail with the following
+As soon as we delete, let say, `myButton` from the `example_layout`, this test will fail with the following
 message `java.lang.AssertionError: expected:<[]> but was:<[myButton]>`. While the default assertion message might not be
 very informative, you can create a custom assertion function to provide a clearer error message. Additionally, you can
 expand the test to compare not only IDs but also view types for a more comprehensive check.
@@ -208,15 +208,15 @@ For this approach, you'll need the following additional dependencies:
 > * `robolectric` [source](https://github.com/robolectric/robolectric)
 
 For this approach, the work is very minimal since we are relying on the exception-throwing behavior of view binding.
-First, we create a dummy Fragment, in which we are binding the `ExampleBindingBinding` to Fragment's view. We can pass different layout
+First, we create a dummy Fragment, in which we are binding the `ExampleLayoutBinding` to Fragment's view. We can pass different layout
 resources to Fragment's constructor to simulate the real scenario.
 
 ```kotlin
-class TestExampleFragment(@LayoutRes contentLayoutId: Int) : Fragment(contentLayoutId) {
+class DummyFragment(@LayoutRes contentLayoutId: Int) : Fragment(contentLayoutId) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ExampleBindingBinding.bind(view)
+        ExampleLayoutBinding.bind(view)
     }
 }
 
@@ -226,17 +226,17 @@ class ExampleUnitTest {
     @Test
     fun assertIdsEquality() {
         launchFragment {
-            val res = R.layout.example_binding // it could be also copy_example_binding
-            TestExampleFragment(res)
+            val res = R.layout.example_layout // it could be also copy_example_layout
+            DummyFragment(res)
         }
     }
 }
 ```
 
-When this test runs, the view binding itself checks that the resource used to create a view and the `ExampleBindingBinding` have the same Views with the same id.
+When this test runs, the view binding itself checks that the resource used to create a view and the `ExampleLayoutBinding` have the same Views with the same id.
 In case there isn't a match, the test will fail with this message: `Missing required view with ID: com.example.binding:id/myButton`.
 
-This test also cover the (im)possibility to have the same id for two different View, e.g. Button with id `button` in the `example_binding` layout and a Text with the same id in the `copy_example_binding` layout. If this happens, the test will fail and the message will be something like `TextView cannot be cast to class Button`.
+This test also cover the (im)possibility to have the same id for two different View, e.g. Button with id `button` in the `example_layout` layout and a Text with the same id in the `copy_example_layout` layout. If this happens, the test will fail and the message will be something like `TextView cannot be cast to class Button`.
 
 However, it's possible to have different view types between different layout configurations sharing the same id. For that, you have to tell the compiler what type to use in the generated binding class using `tools:viewBindingType="YourViewType"`. More about the hints in the [official doc](https://developer.android.com/topic/libraries/view-binding#viewbindingtype). 
  ___
