@@ -223,14 +223,38 @@ class DummyFragment(@LayoutRes contentLayoutId: Int) : Fragment(contentLayoutId)
 }
 
 @RunWith(RobolectricTestRunner::class)
-class ExampleUnitTest {
+class ExampleLayoutBindingTest {
     
     @Test
-    fun assertIdsEquality() {
+    fun testViewInflation() {
         launchFragment {
             val res = R.layout.example_layout // it could be also copy_example_layout
             DummyFragment(res)
         }
+    }
+}
+```
+
+We can also avoid using the `fragment scenario` altogether and only rely on View inflation. 
+
+```kotlin
+class DummyView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr) {
+
+    // do the same in another view that inflates CopyExampleLayoutBinding and binds ExampleLayoutBinding
+    private val binding = ExampleLayoutBinding.inflate(LayoutInflater.from(context), this, true)
+    private val copyBinding = CopyExampleLayoutBinding.bind(binding.root)
+}
+
+@RunWith(RobolectricTestRunner::class)
+class ExampleLayoutBindingTest {
+    
+    @Test
+    fun testViewInflation() {
+        DummyView(InstrumentationRegistry.getInstrumentation().context)
     }
 }
 ```
