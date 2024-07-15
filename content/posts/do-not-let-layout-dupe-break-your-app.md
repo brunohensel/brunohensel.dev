@@ -105,7 +105,7 @@ ___
 
 #### First approach - Breadth-First Search (BFS) for Layout Traversal
 
-To achieve this, we'll leverage a Breadth-First Search ([BFS](https://en.wikipedia.org/wiki/Breadth-first_search) algorithm.
+To achieve this, we'll leverage a Breadth-First Search ([BFS](https://en.wikipedia.org/wiki/Breadth-first_search)) algorithm.
 This algorithm allows us to efficiently traverse the layout hierarchy, visiting all child nodes level by level.
 
 First, we will create a dummy View, in which both view bindings (original and copied layouts) are inflated. This allows us to access the root view of each layout.
